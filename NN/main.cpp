@@ -9,26 +9,31 @@
 
 int main(int argc, const char * argv[])
 	{
-	vector<double, 3> x = {2, 1, 0};
-	matrix<double, 2, 3> y =
+	vector x = {2, 1, 0};
+	matrix y(2,3);
+	y =
 		{
-		1, -1, 2,
-		0, -3, 1
+		1.0, -1.0, 2.0,
+		0.0, -3.0, 1.0
 		};
 
-	matrix<double, 2, 3> a =
+	matrix a(2, 3);
+	a =
 		{
 		1, 2, 3,
 		4, 5, 6
 		};
 
 
-	matrix<double, 3, 4> b =
+	matrix b(3, 4);
+	b =
 		{
 		1, 1, 1, 1,
 		1, 1, 1, 1,
 		1, 1, 1, 1,
 		};
+
+	vector bias = {1, 1};
 
 	std::cout << "x = \n" << x << '\n';
 	std::cout << "y = \n" << y << '\n';
@@ -36,8 +41,9 @@ int main(int argc, const char * argv[])
 	auto z = y.multiply(x);
 	std::cout << "ans = \n" << z << "\n\n";
 
-	auto d = y.multiply(x, nn::ReLU);
-	std::cout << "ans = \n" << d << "\n\n";
+	vector bz(2);
+	y.multiply(bz, x, bias, ReLU);
+	std::cout << "biased ans = \n" << bz << "\n\n";
 
 	std::cout << "a = \n" << a << '\n';
 	std::cout << "b = \n" << b << '\n';

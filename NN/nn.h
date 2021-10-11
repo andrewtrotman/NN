@@ -6,15 +6,12 @@
 
 #include <algorithm>
 
+template <typename TYPE, size_t FEATURES, size_t TRAIN_SIZE>
 class nn
 	{
-	public:
-		/*
-			NN::RELU()
-			----------
-		*/
-		static double ReLU(double input)
-			{
-			return std::max(input, 0.0);
-			}
 	};
+
+inline double ReLU(double input)
+	{
+	return std::max(input, 0.0);
+	}

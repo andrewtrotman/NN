@@ -10,46 +10,30 @@
 	CLASS MATRIX
 	------------
 */
-template <typename TYPE, size_t ROWS, size_t COLUMNS>
 class matrix
 	{
-	template <typename TYPE1, size_t ROWS1, size_t COLUMNS1> friend std::ostream &operator<<(std::ostream &stream, const matrix<TYPE1, ROWS1, COLUMNS1> &data);
+	friend std::ostream &operator<<(std::ostream &stream, const matrix &data);
 
 	public:
-		TYPE values[ROWS][COLUMNS];
+		double *values;
+		size_t rows;
+		size_t columns;
+
+	private:
+		matrix() = delete;
 
 	public:
 		/*
 			MATRIX::MATRIX()
 			----------------
 		*/
-		matrix()
+		matrix(size_t rows, size_t columns) :
+			rows(rows),
+			columns(columns)
 			{
-			/* Nothing */
+			values = new double[rows * columns];
+			memset(values, 0, sizeof(double) * rows * columns);
 			}
-
-		/*
-			MATRIX::MATRIX()
-			----------------
-		*/
-		matrix(std::initializer_list<TYPE> initial)
-			{
-			size_t row = 0;
-			size_t column = 0;
-
-			for (TYPE value : initial)
-				{
-				values[row][column] = value;
-				column++;
-				if (column >= COLUMNS)
-					{
-					row++;
-					column = 0;
-					}
-				}
-			}
-
-
 
 		/*
 			MATRIX::~MATRIX()
@@ -57,22 +41,44 @@ class matrix
 		*/
 		virtual ~matrix()
 			{
-			/* Nothing */
+			delete [] values;
+			}
+
+		/*
+			MATRIX::OPERATOR()()
+			--------------------
+		*/
+		double &operator()(size_t y, size_t x) const
+			{
+			return values[y * columns + x];
+			}
+
+		/*
+			MATRIX::OPERATOR=()
+			-------------------
+		*/
+		matrix &operator=(std::initializer_list<double> &&data)
+			{
+			size_t index = 0;
+			for (double value : data)
+				values[index++] = value;
+
+			return *this;
 			}
 
 		/*
 			MATRIX::MULTIPLY()
 			------------------
 		*/
-		vector<TYPE, ROWS> multiply(vector<TYPE, COLUMNS> &with)
+		vector multiply(vector &with)
 			{
-			vector<TYPE, ROWS> answer;
+			vector answer(rows);
 
-			for (size_t row = 0; row < ROWS; row++)
+			for (size_t row = 0; row < rows; row++)
 				{
 				answer[row] = 0;
-				for (size_t column = 0; column < COLUMNS; column++)
-					answer[row] += values[row][column] * with[column];
+				for (size_t column = 0; column < columns; column++)
+					answer[row] += (*this)(row, column) * with[column];
 				}
 
 			return answer;
@@ -83,60 +89,53 @@ class matrix
 			------------------
 		*/
 		template <typename FUNCTOR>
-		vector<TYPE, ROWS> multiply(vector<TYPE, COLUMNS> &with, FUNCTOR &f)
+		void multiply(vector &answer, vector &with, vector &bias, FUNCTOR &f)
 			{
-			vector<TYPE, ROWS> answer;
-
-			for (size_t row = 0; row < ROWS; row++)
+			memset(answer.values, 0, sizeof(answer.values) * answer.size);		// initialise to 0
+			for (size_t row = 0; row < rows; row++)
 				{
-				answer[row] = 0;
-				for (size_t column = 0; column < COLUMNS; column++)
-					answer[row] += values[row][column] * with[column];
-				answer[row] = f(answer[row]);
+				for (size_t column = 0; column < columns; column++)
+					answer[row] += (*this)(row, column) * with[column];
+				answer[row] = f(answer[row] + bias[row]);
 				}
-
-			return answer;
 			}
 
 		/*
 			MATRIX::MULTIPLY()
 			------------------
 		*/
-		template <size_t ROWS2 = COLUMNS, size_t COLUMNS2>
-		matrix<TYPE, ROWS, COLUMNS2> multiply(matrix<TYPE, ROWS2, COLUMNS2> &with)
+		matrix multiply(matrix &with)
 			{
-			matrix<TYPE, ROWS, COLUMNS2> answer;
+			matrix answer(rows, with.columns);
 
-			for (size_t row = 0; row < ROWS; row++)
-				for (size_t other_column = 0; other_column < COLUMNS2; other_column++)
+			for (size_t row = 0; row < rows; row++)
+				for (size_t other_column = 0; other_column < with.columns; other_column++)
 					{
-					answer.values[row][other_column] = 0;
-					for (size_t column = 0; column < COLUMNS; column++)
-						answer.values[row][other_column] += values[row][column] * with.values[column][other_column];
+					answer(row, other_column) = 0;
+					for (size_t column = 0; column < columns; column++)
+						answer(row, other_column) += (*this)(row, column) * with(column, other_column);
 					}
 
 			return answer;
 			}
-
 	};
 
 /*
 	OPERATOR<<()
 	------------
 */
-template <typename TYPE, size_t ROWS, size_t COLUMNS>
-std::ostream &operator<<(std::ostream &stream, const matrix<TYPE, ROWS, COLUMNS> &data)
+inline std::ostream &operator<<(std::ostream &stream, const matrix &data)
 	{
 	stream << '{';
-	for (size_t row = 0; row < ROWS; row++)
+	for (size_t row = 0; row < data.rows; row++)
 		{
 		if (row != 0)
 			stream << '\n';
-		for (size_t column = 0; column < COLUMNS; column++)
+		for (size_t column = 0; column < data.columns; column++)
 			{
 			if (column != 0)
 				stream << ", ";
-			stream << data.values[row][column];
+			stream << data(row, column);
 			}
 		}
 	stream << '}';

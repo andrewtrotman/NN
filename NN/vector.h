@@ -13,33 +13,41 @@
 	CLASS VECTOR
 	------------
 */
-template <typename TYPE, size_t SIZE>
 class vector
 	{
-	template <typename TYPE1, size_t SIZE1> friend std::ostream &operator<<(std::ostream &stream, const vector<TYPE1, SIZE1> &data);
+	friend std::ostream &operator<<(std::ostream &stream, const vector &data);
+	friend class matrix;
 
 	private:
-		TYPE values[SIZE];
-		
+		double *values;
+		size_t size;
+
+	private:
+		vector() = delete;
+
 	public:
 		/*
 			VECTOR::VECTOR()
 			----------------
 		*/
-		vector()
+		vector(size_t size) :
+			size(size)
 			{
-			memset(values, 0, sizeof(values));
+			values = new double[size];
+			memset(values, 0, sizeof(*values) * size);
 			}
 
 		/*
 			VECTOR::VECTOR()
 			----------------
 		*/
-		vector(std::initializer_list<TYPE> initial)
+		vector(std::initializer_list<double> initial):
+			size(initial.size())
 			{
-			size_t which = 0;
+			values = new double[size];
 
-			for (TYPE value : initial)
+			size_t which = 0;
+			for (double value : initial)
 				values[which++] = value;
 			}
 
@@ -49,14 +57,14 @@ class vector
 		*/
 		virtual ~vector()
 			{
-			/* Nothing */
+			delete [] values;
 			}
 
 		/*
 			VECTOR::OPERATOR[]()
 			--------------------
 		*/
-		TYPE &operator[](size_t index)
+		double &operator[](size_t index)
 			{
 			return values[index];
 			}
@@ -66,11 +74,10 @@ class vector
 	OPERATOR<<()
 	------------
 */
-template <typename TYPE, size_t SIZE>
-std::ostream &operator<<(std::ostream &stream, const vector<TYPE, SIZE> &data)
+inline std::ostream &operator<<(std::ostream &stream, const vector &data)
 	{
 	stream << '{';
-	for (size_t index = 0; index < SIZE; index++)
+	for (size_t index = 0; index < data.size; index++)
 		{
 		if (index != 0)
 			stream << ", ";
