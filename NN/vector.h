@@ -20,7 +20,7 @@ class vector
 
 	private:
 		double *values;
-		size_t size;
+		size_t dimensions;
 
 	private:
 		vector() = delete;
@@ -30,11 +30,22 @@ class vector
 			VECTOR::VECTOR()
 			----------------
 		*/
-		vector(size_t size) :
-			size(size)
+		vector(size_t dimensions) :
+			dimensions(dimensions)
 			{
-			values = new double[size];
-			memset(values, 0, sizeof(*values) * size);
+			values = new double[dimensions];
+			memset(values, 0, sizeof(*values) * dimensions);
+			}
+
+		/*
+			VECTOR::VECTOR()
+			----------------
+		*/
+		vector(vector &from) :
+			dimensions(from.dimensions)
+			{
+			values = new double[dimensions];
+			memcpy(values, from.values, sizeof(*values) * dimensions);
 			}
 
 		/*
@@ -42,9 +53,9 @@ class vector
 			----------------
 		*/
 		vector(std::initializer_list<double> initial):
-			size(initial.size())
+			dimensions(initial.size())
 			{
-			values = new double[size];
+			values = new double[dimensions];
 
 			size_t which = 0;
 			for (double value : initial)
@@ -64,9 +75,18 @@ class vector
 			VECTOR::OPERATOR[]()
 			--------------------
 		*/
-		double &operator[](size_t index)
+		double &operator[](size_t index) const
 			{
 			return values[index];
+			}
+
+		/*
+			VECTOR::SIZE()
+			--------------
+		*/
+		size_t size(void) const
+			{
+			return dimensions;
 			}
 	};
 
@@ -77,7 +97,7 @@ class vector
 inline std::ostream &operator<<(std::ostream &stream, const vector &data)
 	{
 	stream << '{';
-	for (size_t index = 0; index < data.size; index++)
+	for (size_t index = 0; index < data.dimensions; index++)
 		{
 		if (index != 0)
 			stream << ", ";

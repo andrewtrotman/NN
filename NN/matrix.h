@@ -35,6 +35,14 @@ class matrix
 			memset(values, 0, sizeof(double) * rows * columns);
 			}
 
+		matrix(matrix &from) :
+			rows(from.rows),
+			columns(from.columns)
+			{
+			values = new double[rows * columns];
+			memcpy(values, from.values, sizeof(double) * rows * columns);
+			}
+
 		/*
 			MATRIX::~MATRIX()
 			----------------
@@ -91,7 +99,7 @@ class matrix
 		template <typename FUNCTOR>
 		void multiply(vector &answer, vector &with, vector &bias, FUNCTOR &f)
 			{
-			memset(answer.values, 0, sizeof(answer.values) * answer.size);		// initialise to 0
+			memset(answer.values, 0, sizeof(answer.values) * answer.size());		// initialise to 0
 			for (size_t row = 0; row < rows; row++)
 				{
 				for (size_t column = 0; column < columns; column++)
