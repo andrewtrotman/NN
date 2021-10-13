@@ -9,6 +9,8 @@
 #include <iostream>
 #include <initializer_list>
 
+class matrix;
+
 /*
 	CLASS VECTOR
 	------------
@@ -88,6 +90,12 @@ class vector
 			{
 			return dimensions;
 			}
+
+		/*
+			VECTOR::MULTIPLY()
+			------------------
+		*/
+		void multiply(vector &answer, matrix &with, vector &bias, double (*f)(double));
 	};
 
 /*

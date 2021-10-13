@@ -13,7 +13,8 @@
 class matrix
 	{
 	friend std::ostream &operator<<(std::ostream &stream, const matrix &data);
-
+	friend class vector;
+	
 	public:
 		double *values;
 		size_t rows;
@@ -35,6 +36,10 @@ class matrix
 			memset(values, 0, sizeof(double) * rows * columns);
 			}
 
+		/*
+			MATRIX::MATRIX()
+			----------------
+		*/
 		matrix(matrix &from) :
 			rows(from.rows),
 			columns(from.columns)
@@ -56,9 +61,9 @@ class matrix
 			MATRIX::OPERATOR()()
 			--------------------
 		*/
-		double &operator()(size_t y, size_t x) const
+		double &operator()(size_t row, size_t column) const
 			{
-			return values[y * columns + x];
+			return values[row * columns + column];
 			}
 
 		/*
@@ -72,6 +77,20 @@ class matrix
 				values[index++] = value;
 
 			return *this;
+			}
+
+		/*
+			MATRIX::ROW()
+			-------------
+		*/
+		vector row(size_t which_row)
+			{
+			vector answer(columns);
+
+			for (size_t column = 0; column < columns; column++)
+				answer[column] = operator()(which_row, column);
+
+			return answer;
 			}
 
 		/*
@@ -97,15 +116,20 @@ class matrix
 			------------------
 		*/
 		template <typename FUNCTOR>
-		void multiply(vector &answer, vector &with, vector &bias, FUNCTOR &f)
+		void multiply(matrix &answer, matrix &with, vector &bias, FUNCTOR &f)
 			{
-			memset(answer.values, 0, sizeof(answer.values) * answer.size());		// initialise to 0
 			for (size_t row = 0; row < rows; row++)
-				{
-				for (size_t column = 0; column < columns; column++)
-					answer[row] += (*this)(row, column) * with[column];
-				answer[row] = f(answer[row] + bias[row]);
-				}
+				for (size_t other_column = 0; other_column < with.columns; other_column++)
+					{
+					double score = 0;
+					for (size_t column = 0; column < columns; column++)
+						{
+						std::cout << (*this)(row, column) << " * " << with(column, other_column) << " + ";
+						score += (*this)(row, column) * with(column, other_column);
+						}
+					std::cout << bias[other_column] << "\n";
+					answer(row, other_column) = f(score + bias[other_column]);
+					}
 			}
 
 		/*
