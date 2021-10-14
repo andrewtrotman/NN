@@ -4,7 +4,11 @@
 */
 #pragma once
 
-#include "vector.h"
+#include <stddef.h>
+#include <string.h>
+
+#include <iostream>
+#include <initializer_list>
 
 /*
 	CLASS MATRIX
@@ -13,8 +17,7 @@
 class matrix
 	{
 	friend std::ostream &operator<<(std::ostream &stream, const matrix &data);
-	friend class vector;
-	
+
 	public:
 		double *values;
 		size_t rows;
@@ -171,23 +174,6 @@ class matrix
 			}
 
 		/*
-			MATRIX::OPERATOR+()
-			-------------------
-		*/
-		matrix operator+(vector &with)
-			{
-			size_t row_count = rows == 1 ? 1 : rows;
-			size_t column_count = rows == 1 ? columns : 1;
-			matrix answer(row_count, column_count);
-
-			for (size_t row = 0; row < rows; row++)
-				for (size_t column = 0; column < columns; column++)
-					answer(row, column) = operator()(row, column) + with[row + column];
-
-			return answer;
-			}
-
-		/*
 			MATRIX::MEMBER_WISE_MULTIPLY()
 			------------------------------
 		*/
@@ -202,26 +188,8 @@ class matrix
 			MATRIX::MULTIPLY()
 			------------------
 		*/
-		vector multiply(vector &with)
-			{
-			vector answer(rows);
-
-			for (size_t row = 0; row < rows; row++)
-				{
-				answer[row] = 0;
-				for (size_t column = 0; column < columns; column++)
-					answer[row] += operator()(row, column) * with[column];
-				}
-
-			return answer;
-			}
-
-		/*
-			MATRIX::MULTIPLY()
-			------------------
-		*/
 		template <typename FUNCTOR>
-		void multiply(matrix &answer, matrix &with, vector &bias, FUNCTOR &f)
+		void multiply(matrix &answer, matrix &with, matrix &bias, FUNCTOR &f)
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t other_column = 0; other_column < with.columns; other_column++)
@@ -233,7 +201,7 @@ class matrix
 						score += (*this)(row, column) * with(column, other_column);
 						}
 //					std::cout << bias[other_column] << "\n";
-					answer(row, other_column) = f(score + bias[other_column]);
+					answer(row, other_column) = f(score + bias(1, other_column));
 					}
 			}
 

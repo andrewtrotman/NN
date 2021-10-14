@@ -4,7 +4,6 @@
 */
 #pragma once
 
-#include "vector.h"
 #include "matrix.h"
 
 /*
@@ -14,9 +13,9 @@
 class node
 	{
 	public:
-		vector values;
+		matrix values;
 		matrix weights;
-		vector bias;
+		matrix bias;
 
 	public:
 		/*
@@ -24,9 +23,9 @@ class node
 			------------
 		*/
 		node(size_t input_units) :
-			values(input_units),
+			values(input_units, 1),
 			weights(0, 0),
-			bias(input_units)
+			bias(input_units, 1)
 			{
 			/* Nothing */
 			}
@@ -36,15 +35,15 @@ class node
 			------------
 		*/
 		node(node &previous, size_t nodes) :
-			values(nodes),
-			weights(previous.values.size(), nodes),
-			bias(nodes)
+			values(nodes, 1),
+			weights(previous.values.rows, nodes),
+			bias(nodes, 1)
 			{
-			for (size_t entry = 0; entry < nodes * previous.values.size(); entry++)
+			for (size_t entry = 0; entry < nodes * previous.values.rows; entry++)
 				weights.values[entry] = drand48();
 
 			for (size_t entry = 0; entry < nodes; entry++)
-				bias[entry] = drand48();
+				bias(entry, 1) = drand48();
 			}
 
 		/*

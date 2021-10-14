@@ -10,7 +10,6 @@
 #include "nn.h"
 #include "node.h"
 #include "matrix.h"
-#include "vector.h"
 
 /*
 	RELU_1()
@@ -96,7 +95,7 @@ class nn
 			NN::EXECUTE()
 			-------------
 		*/
-		void execute(vector &output, vector &input)
+		void execute(matrix &output, matrix &input)
 			{
 			if (depth == 0 || depth == 1)
 				output = input;
@@ -120,40 +119,41 @@ class nn
 		*/
 		void train(size_t epocs)
 			{
-//std::cout << "training\n" << training_data << '\n';
-//std::cout << "weights\n" << network[1]->weights << '\n';
-//std::cout << "bias\n" << network[1]->bias << '\n';
+std::cout << "training\n" << training_data << '\n';
+std::cout << "weights\n" << network[1]->weights << '\n';
+std::cout << "bias\n" << network[1]->bias << '\n';
 
 			matrix out_1(training_data.rows, network[1]->weights.columns);
 			training_data.multiply(out_1, network[1]->weights, network[1]->bias, ReLU_1);
 
-std::cout << out_1 << "\n\n";
+std::cout << "answer\n" << out_1 << "\n\n";
 
 // Now for BackProp
 
 			matrix error = out_1 - training_answers;
 
-//std::cout << "errror\n" << error << '\n';
+std::cout << "errror\n" << error << '\n';
 
-			matrix training_data_t = ~training_data;
-//         	matrix deltas(out_1_t.rows, out_1_t.columns);
-//			out_1_t.member_wise_multiply(deltas, error);
+			matrix training_data_t = ~training_data;		// ~ is transpose, so ~T -> T^T
          	matrix deltas = training_data_t * error;
 
-//std::cout << "deltas\n" << deltas << '\n';
+std::cout << "deltas\n" << deltas << '\n';
 
 			matrix adjustments = deltas * learning_parameter;
 
-//std::cout << "adjustments\n" << adjustments << '\n';
+std::cout << "adjustments\n" << adjustments << '\n';
 
 			network[1]->weights = network[1]->weights - adjustments;
 
-//std::cout << "new weight matrix\n" << network[1]->weights << '\n';
+std::cout << "new weight matrix\n" << network[1]->weights << '\n';
 
 			matrix delta_bias = error * learning_parameter;
 
+std::cout << "delta bias\n" << delta_bias << '\n';
 
+			network[1]->bias = network[1]->bias - delta_bias;
 
+std::cout << "new bias\n" << network[1]->bias << "\n\n";
 
 			int x = 0;
 			}

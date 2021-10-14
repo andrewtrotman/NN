@@ -34,8 +34,9 @@ int main(int argc, const char * argv[])
 	network.add_layer(2);		// input layer
 	network.add_layer(1);		// output layer
 
-	vector net_answer(1);
-	vector net_input = {1,0};
+	matrix net_answer(1, 1);
+	matrix net_input(2, 1);
+	net_input = {1,0};
 
 	for (size_t epoc = 0; epoc < 10000; epoc++)
 		network.train(1);
