@@ -15,7 +15,6 @@ class node
 	public:
 		matrix values;
 		matrix weights;
-		matrix bias;
 
 	public:
 		/*
@@ -24,8 +23,7 @@ class node
 		*/
 		node(size_t input_units) :
 			values(input_units, 1),
-			weights(0, 0),
-			bias(input_units, 1)
+			weights(0, 0)
 			{
 			/* Nothing */
 			}
@@ -36,14 +34,10 @@ class node
 		*/
 		node(node &previous, size_t nodes) :
 			values(nodes, 1),
-			weights(previous.values.rows, nodes),
-			bias(nodes, 1)
+			weights(previous.values.rows, nodes)
 			{
 			for (size_t entry = 0; entry < nodes * previous.values.rows; entry++)
 				weights.values[entry] = drand48();
-
-			for (size_t entry = 0; entry < nodes; entry++)
-				bias(entry, 1) = drand48();
 			}
 
 		/*

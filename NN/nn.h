@@ -35,7 +35,6 @@ inline matrix ReLU(matrix input)
 	return answer;
 	}
 
-
 /*
 	CLASS NN
 	--------
@@ -100,16 +99,16 @@ class nn
 			if (depth == 0 || depth == 1)
 				output = input;
 			else if (depth == 2)
-				input.multiply(output, network[1]->weights, network[1]->bias, ReLU_1);
+				input.multiply(output, network[1]->weights, ReLU_1);
 			else
 				{
 				size_t level;
-				input.multiply(network[1]->values, network[1]->weights, network[1]->bias, ReLU_1);
+				input.multiply(network[1]->values, network[1]->weights, ReLU_1);
 
 				for (level = 2; level < depth - 1; level++)
-					network[level - 1]->values.multiply(network[level]->values, network[level]->weights, network[level]->bias, ReLU_1);
+					network[level - 1]->values.multiply(network[level]->values, network[level]->weights, ReLU_1);
 
-				network[level - 1]->values.multiply(output, network[level]->weights, network[level]->bias, ReLU_1);
+				network[level - 1]->values.multiply(output, network[level]->weights, ReLU_1);
 				}
 			}
 
@@ -121,10 +120,9 @@ class nn
 			{
 std::cout << "training\n" << training_data << '\n';
 std::cout << "weights\n" << network[1]->weights << '\n';
-std::cout << "bias\n" << network[1]->bias << '\n';
 
 			matrix out_1(training_data.rows, network[1]->weights.columns);
-			training_data.multiply(out_1, network[1]->weights, network[1]->bias, ReLU_1);
+			training_data.multiply(out_1, network[1]->weights, ReLU_1);
 
 std::cout << "answer\n" << out_1 << "\n\n";
 
@@ -132,28 +130,20 @@ std::cout << "answer\n" << out_1 << "\n\n";
 
 			matrix error = out_1 - training_answers;
 
-std::cout << "errror\n" << error << '\n';
+//std::cout << "errror\n" << error << '\n';
 
 			matrix training_data_t = ~training_data;		// ~ is transpose, so ~T -> T^T
          	matrix deltas = training_data_t * error;
 
-std::cout << "deltas\n" << deltas << '\n';
+//std::cout << "deltas\n" << deltas << '\n';
 
 			matrix adjustments = deltas * learning_parameter;
 
-std::cout << "adjustments\n" << adjustments << '\n';
+//std::cout << "adjustments\n" << adjustments << '\n';
 
 			network[1]->weights = network[1]->weights - adjustments;
 
-std::cout << "new weight matrix\n" << network[1]->weights << '\n';
-
-			matrix delta_bias = error * learning_parameter;
-
-std::cout << "delta bias\n" << delta_bias << '\n';
-
-			network[1]->bias = network[1]->bias - delta_bias;
-
-std::cout << "new bias\n" << network[1]->bias << "\n\n";
+//std::cout << "new weight matrix\n" << network[1]->weights << '\n';
 
 			int x = 0;
 			}
