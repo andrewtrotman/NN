@@ -21,21 +21,6 @@ inline double ReLU_1(double input)
 	}
 
 /*
-	RELU()
-	------
-*/
-inline matrix ReLU(matrix input)
-	{
-	matrix answer(input.rows, input.columns);
-
-	for (size_t row = 0; row < input.rows; row++)
-		for (size_t column = 0; column < input.columns; column++)
-			answer(row, column) = std::max(input(row, column), 0.0);
-
-	return answer;
-	}
-
-/*
 	CLASS NN
 	--------
 */

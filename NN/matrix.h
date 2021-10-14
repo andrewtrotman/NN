@@ -31,7 +31,7 @@ class matrix
 			MATRIX::MATRIX()
 			----------------
 		*/
-		matrix(size_t rows, size_t columns) :
+		matrix(size_t rows, size_t columns) noexcept :
 			rows(rows),
 			columns(columns)
 			{
@@ -43,7 +43,7 @@ class matrix
 			MATRIX::MATRIX()
 			----------------
 		*/
-		matrix(matrix &from) :
+		matrix(matrix &from) noexcept :
 			rows(from.rows),
 			columns(from.columns)
 			{
@@ -51,24 +51,23 @@ class matrix
 			memcpy(values, from.values, sizeof(*values) * rows * columns);
 			}
 
-
 		/*
 			MATRIX::MATRIX()
 			----------------
 		*/
-		matrix(matrix &&from) :
+		matrix(matrix &&from) noexcept :
 			rows(from.rows),
 			columns(from.columns)
 			{
-			values = new double[rows * columns];
-			memcpy(values, from.values, sizeof(*values) * rows * columns);
+			values = from.values;
+			from.values = nullptr;
 			}
 
 		/*
 			MATRIX::~MATRIX()
 			----------------
 		*/
-		virtual ~matrix()
+		virtual ~matrix() noexcept
 			{
 			delete [] values;
 			}
@@ -77,7 +76,7 @@ class matrix
 			MATRIX::OPERATOR()()
 			--------------------
 		*/
-		double &operator()(size_t row, size_t column) const
+		double &operator()(size_t row, size_t column) const noexcept
 			{
 			return values[row * columns + column];
 			}
@@ -86,7 +85,7 @@ class matrix
 			MATRIX::OPERATOR=()
 			-------------------
 		*/
-		matrix &operator=(std::initializer_list<double> &&data)
+		matrix &operator=(std::initializer_list<double> &&data) noexcept
 			{
 			size_t index = 0;
 			for (double value : data)
@@ -99,12 +98,16 @@ class matrix
 			MATRIX::OPERATOR=()
 			-------------------
 		*/
-		matrix &operator=(matrix &what)
+		matrix &operator=(matrix &what) noexcept
 			{
-			delete [] values;
+			if (rows != what.rows || columns != what.columns)
+				{
+				delete [] values;
+				this->values = new double [rows * columns];
+				}
+
 			this->rows = what.rows;
 			this->columns = what.columns;
-			this->values = new double [rows * columns];
 
 			memcpy(values, what.values, sizeof(*values) * rows * columns);
 
@@ -115,15 +118,15 @@ class matrix
 			MATRIX::OPERATOR=()
 			-------------------
 		*/
-		matrix &operator=(matrix &&what)
+		matrix &operator=(matrix &&what) noexcept
 			{
 			delete [] values;
+			values = what.values;
+			what.values = nullptr;
+
 			rows = what.rows;
 			columns = what.columns;
-			values = new double [rows * columns];
 
-			memcpy(values, what.values, sizeof(*values) * rows * columns);
-			
 			return *this;
 			}
 
@@ -131,7 +134,7 @@ class matrix
 			MATRIX::SUBTRACT()
 			------------------
 		*/
-		void subtract(matrix &answer, matrix &right_hand_side)
+		void subtract(matrix &answer, matrix &right_hand_side) const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t column = 0; column < columns; column++)
@@ -142,7 +145,7 @@ class matrix
 			MATRIX::OPERATOR-()
 			-------------------
 		*/
-		matrix operator-(matrix &with)
+		matrix operator-(matrix &with) const noexcept
 			{
 			matrix answer(with.rows, with.columns);
 			subtract(answer, with);
@@ -154,7 +157,7 @@ class matrix
 			MATRIX::ADD()
 			-------------
 		*/
-		void add(matrix &answer, matrix &right_hand_side)
+		void add(matrix &answer, matrix &right_hand_side) const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t column = 0; column < columns; column++)
@@ -165,7 +168,7 @@ class matrix
 			MATRIX::OPERATOR+()
 			-------------------
 		*/
-		matrix operator+(matrix &with)
+		matrix operator+(matrix &with)  const noexcept
 			{
 			matrix answer(with.rows, with.columns);
 			add(answer, with);
@@ -174,22 +177,11 @@ class matrix
 			}
 
 		/*
-			MATRIX::MEMBER_WISE_MULTIPLY()
-			------------------------------
-		*/
-		void member_wise_multiply(matrix &answer, matrix &right_hand_side)
-			{
-			for (size_t row = 0; row < rows; row++)
-				for (size_t column = 0; column < columns; column++)
-					answer(row, column) = operator()(row, column) * right_hand_side(row, column);
-			}
-
-		/*
 			MATRIX::MULTIPLY()
 			------------------
 		*/
 		template <typename FUNCTOR>
-		void multiply(matrix &answer, matrix &with, FUNCTOR &f)
+		void multiply(matrix &answer, matrix &with, FUNCTOR &f)  const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t other_column = 0; other_column < with.columns; other_column++)
@@ -205,7 +197,7 @@ class matrix
 			MATRIX::MULTIPLY()
 			------------------
 		*/
-		void multiply(matrix &answer, matrix &with)
+		void multiply(matrix &answer, matrix &with)  const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t other_column = 0; other_column < with.columns; other_column++)
@@ -220,7 +212,7 @@ class matrix
 			MATRIX::OPERATOR*()
 			-------------------
 		*/
-		matrix operator*(matrix &with)
+		matrix operator*(matrix &with)  const noexcept
 			{
 			matrix answer(rows, with.columns);
 			multiply(answer, with);
@@ -232,7 +224,7 @@ class matrix
 			MATRIX::OPERATOR*()
 			-------------------
 		*/
-		matrix operator*(matrix &&with)
+		matrix operator*(matrix &&with)  const noexcept
 			{
 			matrix answer(rows, with.columns);
 			multiply(answer, with);
@@ -244,7 +236,7 @@ class matrix
 			MATRIX::OPERATOR*()
 			-------------------
 		*/
-		matrix operator*(double with)
+		matrix operator*(double with)  const noexcept
 			{
 			matrix answer(rows, columns);
 
@@ -255,12 +247,11 @@ class matrix
 			return answer;
 			}
 
-
 		/*
 			MATRIX::TRANSPOSE()
 			-------------------
 		*/
-		void transpose(matrix &answer)
+		void transpose(matrix &answer)  const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t column = 0; column < columns; column++)
@@ -271,7 +262,7 @@ class matrix
 			MATRIX::OPERATOR~()
 			-------------------
 		*/
-		matrix operator~()
+		matrix operator~()  const noexcept
 			{
 			matrix answer(columns, rows);
 			transpose(answer);
