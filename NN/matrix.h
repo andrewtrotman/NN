@@ -48,6 +48,19 @@ class matrix
 			memcpy(values, from.values, sizeof(*values) * rows * columns);
 			}
 
+
+		/*
+			MATRIX::MATRIX()
+			----------------
+		*/
+		matrix(matrix &&from) :
+			rows(from.rows),
+			columns(from.columns)
+			{
+			values = new double[rows * columns];
+			memcpy(values, from.values, sizeof(*values) * rows * columns);
+			}
+
 		/*
 			MATRIX::~MATRIX()
 			----------------
@@ -76,6 +89,32 @@ class matrix
 			for (double value : data)
 				values[index++] = value;
 
+			return *this;
+			}
+
+		/*
+			MATRIX::OPERATOR=()
+			-------------------
+		*/
+		matrix &operator=(matrix &what)
+			{
+			this->rows = what.rows;
+			this->columns = what.columns;
+			this->values = new double [rows * columns];
+
+			return *this;
+			}
+
+		/*
+			MATRIX::OPERATOR=()
+			-------------------
+		*/
+		matrix &operator=(matrix &&what)
+			{
+			this->rows = what.rows;
+			this->columns = what.columns;
+			this->values = new double [rows * columns];
+			
 			return *this;
 			}
 
