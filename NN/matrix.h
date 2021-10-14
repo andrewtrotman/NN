@@ -232,6 +232,18 @@ class matrix
 			MATRIX::OPERATOR*()
 			-------------------
 		*/
+		matrix operator*(matrix &&with)
+			{
+			matrix answer(rows, with.columns);
+			multiply(answer, with);
+
+			return answer;
+			}
+
+		/*
+			MATRIX::OPERATOR*()
+			-------------------
+		*/
 		matrix operator*(double with)
 			{
 			matrix answer(rows, columns);

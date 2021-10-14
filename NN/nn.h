@@ -118,9 +118,6 @@ class nn
 		*/
 		void train(size_t epocs)
 			{
-std::cout << "training\n" << training_data << '\n';
-std::cout << "weights\n" << network[1]->weights << '\n';
-
 			matrix out_1(training_data.rows, network[1]->weights.columns);
 			training_data.multiply(out_1, network[1]->weights, ReLU_1);
 
@@ -128,24 +125,8 @@ std::cout << "answer\n" << out_1 << "\n\n";
 
 // Now for BackProp
 
-			matrix error = out_1 - training_answers;
-
-//std::cout << "errror\n" << error << '\n';
-
-			matrix training_data_t = ~training_data;		// ~ is transpose, so ~T -> T^T
-         	matrix deltas = training_data_t * error;
-
-//std::cout << "deltas\n" << deltas << '\n';
-
-			matrix adjustments = deltas * learning_parameter;
-
-//std::cout << "adjustments\n" << adjustments << '\n';
-
+         	matrix adjustments = ~training_data * (out_1 - training_answers) * learning_parameter;
 			network[1]->weights = network[1]->weights - adjustments;
-
-//std::cout << "new weight matrix\n" << network[1]->weights << '\n';
-
-			int x = 0;
 			}
 
 		/*
