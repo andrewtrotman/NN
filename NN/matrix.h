@@ -33,7 +33,7 @@ class matrix
 			columns(columns)
 			{
 			values = new double[rows * columns];
-			memset(values, 0, sizeof(double) * rows * columns);
+			memset(values, 0, sizeof(*values) * rows * columns);
 			}
 
 		/*
@@ -45,7 +45,7 @@ class matrix
 			columns(from.columns)
 			{
 			values = new double[rows * columns];
-			memcpy(values, from.values, sizeof(double) * rows * columns);
+			memcpy(values, from.values, sizeof(*values) * rows * columns);
 			}
 
 		/*
@@ -80,17 +80,77 @@ class matrix
 			}
 
 		/*
-			MATRIX::ROW()
-			-------------
+			MATRIX::SUBTRACT()
+			------------------
 		*/
-		vector row(size_t which_row)
+		void subtract(matrix &answer, matrix &right_hand_side)
 			{
-			vector answer(columns);
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = operator()(row, column) - right_hand_side(row, column);
+			}
 
-			for (size_t column = 0; column < columns; column++)
-				answer[column] = operator()(which_row, column);
+		/*
+			MATRIX::OPERATOR-()
+			-------------------
+		*/
+		matrix operator-(matrix &with)
+			{
+			matrix answer(with.rows, with.columns);
+			subtract(answer, with);
 
 			return answer;
+			}
+
+		/*
+			MATRIX::ADD()
+			-------------
+		*/
+		void add(matrix &answer, matrix &right_hand_side)
+			{
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = operator()(row, column) + right_hand_side(row, column);
+			}
+
+		/*
+			MATRIX::OPERATOR+()
+			-------------------
+		*/
+		matrix operator+(matrix &with)
+			{
+			matrix answer(with.rows, with.columns);
+			add(answer, with);
+
+			return answer;
+			}
+
+		/*
+			MATRIX::OPERATOR+()
+			-------------------
+		*/
+		matrix operator+(vector &with)
+			{
+			size_t row_count = rows == 1 ? 1 : rows;
+			size_t column_count = rows == 1 ? columns : 1;
+			matrix answer(row_count, column_count);
+
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = operator()(row, column) + with[row + column];
+
+			return answer;
+			}
+
+		/*
+			MATRIX::MEMBER_WISE_MULTIPLY()
+			------------------------------
+		*/
+		void member_wise_multiply(matrix &answer, matrix &right_hand_side)
+			{
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = operator()(row, column) * right_hand_side(row, column);
 			}
 
 		/*
@@ -105,7 +165,7 @@ class matrix
 				{
 				answer[row] = 0;
 				for (size_t column = 0; column < columns; column++)
-					answer[row] += (*this)(row, column) * with[column];
+					answer[row] += operator()(row, column) * with[column];
 				}
 
 			return answer;
@@ -136,10 +196,8 @@ class matrix
 			MATRIX::MULTIPLY()
 			------------------
 		*/
-		matrix multiply(matrix &with)
+		void multiply(matrix &answer, matrix &with)
 			{
-			matrix answer(rows, with.columns);
-
 			for (size_t row = 0; row < rows; row++)
 				for (size_t other_column = 0; other_column < with.columns; other_column++)
 					{
@@ -147,6 +205,55 @@ class matrix
 					for (size_t column = 0; column < columns; column++)
 						answer(row, other_column) += (*this)(row, column) * with(column, other_column);
 					}
+			}
+
+		/*
+			MATRIX::OPERATOR*()
+			-------------------
+		*/
+		matrix operator*(matrix &with)
+			{
+			matrix answer(rows, with.columns);
+			multiply(answer, with);
+
+			return answer;
+			}
+
+		/*
+			MATRIX::OPERATOR*()
+			-------------------
+		*/
+		matrix operator*(double with)
+			{
+			matrix answer(rows, columns);
+
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = operator()(row, column) * with;
+
+			return answer;
+			}
+
+
+		/*
+			MATRIX::TRANSPOSE()
+			-------------------
+		*/
+		void transpose(matrix &answer)
+			{
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(column, row) = operator()(row, column);
+			}
+
+		/*
+			MATRIX::OPERATOR~()
+			-------------------
+		*/
+		matrix operator~()
+			{
+			matrix answer(columns, rows);
+			transpose(answer);
 
 			return answer;
 			}
