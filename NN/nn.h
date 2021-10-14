@@ -62,7 +62,7 @@ class nn
 		nn(matrix &training_data, matrix &training_answers) :
 			training_data(training_data),
 			training_answers(training_answers),
-			learning_parameter(0.1)
+			learning_parameter(0.001)
 			{
 			network = nullptr;
 			depth = 0;
@@ -120,45 +120,40 @@ class nn
 		*/
 		void train(size_t epocs)
 			{
-std::cout << "training\n" << training_data << '\n';
-std::cout << "weights\n" << network[1]->weights << '\n';
-std::cout << "bias\n" << network[1]->bias << '\n';
+//std::cout << "training\n" << training_data << '\n';
+//std::cout << "weights\n" << network[1]->weights << '\n';
+//std::cout << "bias\n" << network[1]->bias << '\n';
 
 			matrix out_1(training_data.rows, network[1]->weights.columns);
 			training_data.multiply(out_1, network[1]->weights, network[1]->bias, ReLU_1);
 
-std::cout << "result\n" << out_1 << '\n';
-//std::cout << "\n==\n";
-//
-//			matrix times = training_data * network[1]->weights;
-//std::cout << "training_data=\n"<< training_data << '\n';
-//std::cout << "weights=\n" << network[1]->weights  << '\n';
-//std::cout << "T*W=\n" << times << '\n';
-//			matrix times_wb = times + network[1]->bias;
-//std::cout << "B=\n" << network[1]->bias << '\n';
-//std::cout << "+BIAS=\n" << times_wb << '\n';
-//
-//std::cout << "\n==\n";
-//			matrix another_result = ReLU(training_data * network[1]->weights + network[1]->bias);
-//std::cout << "another-result\n" << another_result << '\n';
-//std::cout << "\n==\n";
+std::cout << out_1 << "\n\n";
 
-std::cout << "should be\n" << training_answers << '\n';
+// Now for BackProp
 
-			matrix error = training_answers - out_1;
+			matrix error = out_1 - training_answers;
 
-std::cout << "errror\n" << error << '\n';
+//std::cout << "errror\n" << error << '\n';
 
-			matrix out_1_t = ~out_1;
+			matrix training_data_t = ~training_data;
+//         	matrix deltas(out_1_t.rows, out_1_t.columns);
+//			out_1_t.member_wise_multiply(deltas, error);
+         	matrix deltas = training_data_t * error;
 
-			matrix deltas(error.rows, out_1_t.columns);
-			deltas = out_1 * error;
-
-std::cout << "deltas\n" << deltas << '\n';
+//std::cout << "deltas\n" << deltas << '\n';
 
 			matrix adjustments = deltas * learning_parameter;
 
-std::cout << "adjustments\n" << adjustments << '\n';
+//std::cout << "adjustments\n" << adjustments << '\n';
+
+			network[1]->weights = network[1]->weights - adjustments;
+
+//std::cout << "new weight matrix\n" << network[1]->weights << '\n';
+
+			matrix delta_bias = error * learning_parameter;
+
+
+
 
 			int x = 0;
 			}

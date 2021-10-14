@@ -98,9 +98,12 @@ class matrix
 		*/
 		matrix &operator=(matrix &what)
 			{
+			delete [] values;
 			this->rows = what.rows;
 			this->columns = what.columns;
 			this->values = new double [rows * columns];
+
+			memcpy(values, what.values, sizeof(*values) * rows * columns);
 
 			return *this;
 			}
@@ -111,9 +114,12 @@ class matrix
 		*/
 		matrix &operator=(matrix &&what)
 			{
-			this->rows = what.rows;
-			this->columns = what.columns;
-			this->values = new double [rows * columns];
+			delete [] values;
+			rows = what.rows;
+			columns = what.columns;
+			values = new double [rows * columns];
+
+			memcpy(values, what.values, sizeof(*values) * rows * columns);
 			
 			return *this;
 			}
@@ -223,10 +229,10 @@ class matrix
 					double score = 0;
 					for (size_t column = 0; column < columns; column++)
 						{
-						std::cout << (*this)(row, column) << " * " << with(column, other_column) << " + ";
+//						std::cout << (*this)(row, column) << " * " << with(column, other_column) << " + ";
 						score += (*this)(row, column) * with(column, other_column);
 						}
-					std::cout << bias[other_column] << "\n";
+//					std::cout << bias[other_column] << "\n";
 					answer(row, other_column) = f(score + bias[other_column]);
 					}
 			}

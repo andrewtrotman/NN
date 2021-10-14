@@ -11,10 +11,10 @@ void vector::multiply(vector &answer, matrix &with, vector &bias, double (*f)(do
 		double score = 0;
 		for (size_t row = 0; row < size(); row++)
 			{
-			std::cout << values[row] << " * " << with(row, column) << " + ";
+//			std::cout << values[row] << " * " << with(row, column) << " + ";
 			score += values[row] * with(row, column);
 			}
-		std::cout << bias[column] << "\n";
+//		std::cout << bias[column] << "\n";
 		answer[column] = f(score + bias[column]);
 		}
 	}

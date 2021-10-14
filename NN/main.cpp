@@ -27,7 +27,7 @@ int main(int argc, const char * argv[])
 		0,
 		1,
 		1,
-		0
+		2
 		};
 
 	nn network(training_data, training_answers);
@@ -37,7 +37,8 @@ int main(int argc, const char * argv[])
 	vector net_answer(1);
 	vector net_input = {1,0};
 
-	network.train(1);
+	for (size_t epoc = 0; epoc < 10000; epoc++)
+		network.train(1);
 
 	network.execute(net_answer, net_input);
 
