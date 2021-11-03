@@ -103,11 +103,11 @@ class matrix
 			if (rows != what.rows || columns != what.columns)
 				{
 				delete [] values;
-				this->values = new double [rows * columns];
+				values = new double [rows * columns];
 				}
 
-			this->rows = what.rows;
-			this->columns = what.columns;
+			rows = what.rows;
+			columns = what.columns;
 
 			memcpy(values, what.values, sizeof(*values) * rows * columns);
 
@@ -154,6 +154,18 @@ class matrix
 			}
 
 		/*
+			MATRIX::OPERATOR-()
+			-------------------
+		*/
+		matrix operator-(matrix &&with) const noexcept
+			{
+			matrix answer(with.rows, with.columns);
+			subtract(answer, with);
+
+			return answer;
+			}
+
+		/*
 			MATRIX::ADD()
 			-------------
 		*/
@@ -181,15 +193,16 @@ class matrix
 			------------------
 		*/
 		template <typename FUNCTOR>
-		void multiply(matrix &answer, matrix &with, FUNCTOR &f)  const noexcept
+		void multiply(matrix &answer, matrix &derivitive, matrix &with, FUNCTOR &f, FUNCTOR &derivitive_of_f)  const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t other_column = 0; other_column < with.columns; other_column++)
 					{
 					double score = 0;
 					for (size_t column = 0; column < columns; column++)
-						score += (*this)(row, column) * with(column, other_column);
+						score += operator()(row, column) * with(column, other_column);
 					answer(row, other_column) = f(score);
+					derivitive(row, other_column) = derivitive_of_f(score);
 					}
 			}
 
@@ -204,7 +217,7 @@ class matrix
 					{
 					answer(row, other_column) = 0;
 					for (size_t column = 0; column < columns; column++)
-						answer(row, other_column) += (*this)(row, column) * with(column, other_column);
+						answer(row, other_column) += operator()(row, column) * with(column, other_column);
 					}
 			}
 
@@ -266,6 +279,20 @@ class matrix
 			{
 			matrix answer(columns, rows);
 			transpose(answer);
+
+			return answer;
+			}
+
+		/*
+			HADAMARD_PRODUCT()
+			------------------
+		*/
+		matrix hadamard_product(matrix &right_hand_side)
+			{
+			matrix answer(rows, columns);
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = operator()(row, column) * right_hand_side(row, column);
 
 			return answer;
 			}

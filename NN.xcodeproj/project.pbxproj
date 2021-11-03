@@ -7,10 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		499AD5CC27166B0B006DADAB /* node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499AD5CA27166B0B006DADAB /* node.cpp */; };
 		49B56F422713EEE900DB30BF /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B56F412713EEE900DB30BF /* main.cpp */; };
 		49B56F4A2713EF2B00DB30BF /* nn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B56F482713EF2B00DB30BF /* nn.cpp */; };
-		49B56F4D2713EFD500DB30BF /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B56F4B2713EFD500DB30BF /* matrix.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,13 +24,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		499AD5CA27166B0B006DADAB /* node.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = node.cpp; sourceTree = "<group>"; };
 		499AD5CB27166B0B006DADAB /* node.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = node.h; sourceTree = "<group>"; };
 		49B56F3E2713EEE900DB30BF /* NN */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NN; sourceTree = BUILT_PRODUCTS_DIR; };
 		49B56F412713EEE900DB30BF /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		49B56F482713EF2B00DB30BF /* nn.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nn.cpp; sourceTree = "<group>"; };
 		49B56F492713EF2B00DB30BF /* nn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nn.h; sourceTree = "<group>"; };
-		49B56F4B2713EFD500DB30BF /* matrix.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = matrix.cpp; sourceTree = "<group>"; };
 		49B56F4C2713EFD500DB30BF /* matrix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = matrix.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -67,11 +63,9 @@
 			isa = PBXGroup;
 			children = (
 				49B56F412713EEE900DB30BF /* main.cpp */,
-				49B56F4B2713EFD500DB30BF /* matrix.cpp */,
 				49B56F4C2713EFD500DB30BF /* matrix.h */,
 				49B56F482713EF2B00DB30BF /* nn.cpp */,
 				49B56F492713EF2B00DB30BF /* nn.h */,
-				499AD5CA27166B0B006DADAB /* node.cpp */,
 				499AD5CB27166B0B006DADAB /* node.h */,
 			);
 			path = NN;
@@ -104,7 +98,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1310;
 				TargetAttributes = {
 					49B56F3D2713EEE900DB30BF = {
 						CreatedOnToolsVersion = 13.0;
@@ -136,8 +130,6 @@
 			files = (
 				49B56F422713EEE900DB30BF /* main.cpp in Sources */,
 				49B56F4A2713EF2B00DB30BF /* nn.cpp in Sources */,
-				499AD5CC27166B0B006DADAB /* node.cpp in Sources */,
-				49B56F4D2713EFD500DB30BF /* matrix.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +250,7 @@
 		49B56F462713EEE900DB30BF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JL2ZYSYD53;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -268,6 +261,7 @@
 		49B56F472713EEE900DB30BF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = JL2ZYSYD53;
 				ENABLE_HARDENED_RUNTIME = YES;

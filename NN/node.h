@@ -15,6 +15,8 @@ class node
 	public:
 		matrix values;
 		matrix weights;
+		matrix derivitive;
+		matrix delta;
 
 	public:
 		/*
@@ -23,7 +25,9 @@ class node
 		*/
 		node(size_t input_units) :
 			values(input_units, 1),
-			weights(0, 0)
+			weights(0, 0),
+			derivitive(0,0),
+			delta(0,0)
 			{
 			/* Nothing */
 			}
@@ -32,12 +36,30 @@ class node
 			NODE::NODE()
 			------------
 		*/
-		node(node &previous, size_t nodes) :
-			values(nodes, 1),
-			weights(previous.values.rows, nodes)
+		node(matrix &training_data) :
+			values(training_data.rows, training_data.columns),
+			weights(0, 0),
+			derivitive(0, 0),
+			delta(0,0)
 			{
-			for (size_t entry = 0; entry < nodes * previous.values.rows; entry++)
+			values = training_data;
+			}
+
+		/*
+			NODE::NODE()
+			------------
+		*/
+		node(node &previous, size_t units) :
+			values(previous.values.rows, units),
+			weights(previous.values.columns, units),
+			derivitive(previous.values.rows, units),
+			delta(0, 0)
+			{
+			for (size_t entry = 0; entry < units * previous.values.rows; entry++)
+				{
 				weights.values[entry] = drand48();
+				derivitive.values[entry] = 0;
+				}
 			}
 
 		/*

@@ -30,21 +30,16 @@ int main(int argc, const char * argv[])
 		2
 		};
 
-	nn network(training_data, training_answers);
-	network.add_layer(3);		// input layer
-	network.add_layer(1);		// output layer
+	nn network(training_data, training_answers);		// the training data defines the input layer.
+//	network.add_layer(3);		// hidden layer
+//	network.add_layer(5);		// hidden layer
+//	network.add_layer(3);		// hidden layer
+	network.add_layer(1);		// output layer is a single value
 
-	matrix net_answer(1, 1);
-	matrix net_input(2, 1);
-	net_input = {1,0};
-
-	for (size_t epoc = 0; epoc < 50; epoc++)
+	for (size_t epoc = 0; epoc < 100000; epoc++)
 		network.train(1);
 
-	network.execute(net_answer, net_input);
-
-	std::cout << "NN answer = ";
-	std::cout << net_answer << '\n';
+	network.execute();
 
 	return 0;
 	}

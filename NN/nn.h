@@ -12,12 +12,21 @@
 #include "matrix.h"
 
 /*
-	RELU_1()
-	--------
+	RELU()
+	------
 */
-inline double ReLU_1(double input)
+inline double ReLU(double input)
 	{
 	return std::max(input, 0.0);
+	}
+
+/*
+	RELU_DERIVERATIVE()
+	-------------------
+*/
+inline double ReLU_derivitive(double input)
+	{
+	return input > 0 ? 1 : 0;
 	}
 
 /*
@@ -47,8 +56,9 @@ class nn
 			training_answers(training_answers),
 			learning_parameter(0.001)
 			{
-			network = nullptr;
-			depth = 0;
+			network = (node **)malloc(sizeof(*network));
+			network[0] = new node(training_data);
+			depth = 1;
 			}
 
 		/*
@@ -66,35 +76,21 @@ class nn
 		*/
 		void add_layer(size_t units)
 			{
+			network = (node **)realloc(network, sizeof(*network) * (depth + 1));
+			network[depth] = new node(*network[depth - 1], units);
 			depth++;
-			network = (node **)realloc(network, sizeof(*network) * depth);
-
-			if (depth == 1)
-				network[depth - 1] = new node(units);
-			else
-				network[depth - 1] = new node(*network[depth - 2], units);
 			}
 
 		/*
 			NN::EXECUTE()
 			-------------
 		*/
-		void execute(matrix &output, matrix &input)
+		void execute(void)
 			{
-			if (depth == 0 || depth == 1)
-				output = input;
-			else if (depth == 2)
-				input.multiply(output, network[1]->weights, ReLU_1);
-			else
-				{
-				size_t level;
-				input.multiply(network[1]->values, network[1]->weights, ReLU_1);
+			for (size_t level = 1;  level < depth; level++)
+				network[level - 1]->values.multiply(network[level]->values, network[level]->derivitive, network[level]->weights, ReLU, ReLU_derivitive);
 
-				for (level = 2; level < depth - 1; level++)
-					network[level - 1]->values.multiply(network[level]->values, network[level]->weights, ReLU_1);
-
-				network[level - 1]->values.multiply(output, network[level]->weights, ReLU_1);
-				}
+			std::cout << "Answer:\n" << network[depth - 1]->values << '\n';
 			}
 
 		/*
@@ -103,15 +99,24 @@ class nn
 		*/
 		void train(size_t epocs)
 			{
-			matrix out_1(training_data.rows, network[1]->weights.columns);
-			training_data.multiply(out_1, network[1]->weights, ReLU_1);
+			/*
+				Forward propegate the training set
+			*/
+			for (size_t level = 1;  level < depth; level++)
+				network[level - 1]->values.multiply(network[level]->values, network[level]->derivitive, network[level]->weights, ReLU, ReLU_derivitive);
 
-std::cout << "answer\n" << out_1 << "\n\n";
+			/*
+				Compute the deltas through back propegation
+			*/
+         	network[depth - 1]->delta = (network[depth - 1]->values - training_answers).hadamard_product(network[depth - 1]->derivitive);
+			for (size_t level = depth - 2; level > 0; level--)
+	         	network[level]->delta = (network[level + 1]->delta * ~network[level + 1]->weights).hadamard_product(network[level]->derivitive);
 
-// Now for BackProp
-
-         	matrix adjustments = ~training_data * (out_1 - training_answers) * learning_parameter;
-			network[1]->weights = network[1]->weights - adjustments;
+			/*
+				Update the weights
+			*/
+			for (size_t level = 1;  level < depth; level++)
+				network[level]->weights = network[level]->weights - (~network[level - 1]->values * network[level]->delta * learning_parameter);
 			}
 
 		/*
