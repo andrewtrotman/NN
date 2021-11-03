@@ -296,6 +296,19 @@ class matrix
 
 			return answer;
 			}
+
+		/*
+			SUBTRACT_THEN_HADAMARD_PRODUCT()
+			--------------------------------
+		*/
+		matrix subtract_then_hadamard_product(matrix &answer, matrix &subtractor, matrix &right_hand_side)
+			{
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = (operator()(row, column) - subtractor(row, column)) * right_hand_side(row, column);
+
+			return answer;
+			}
 	};
 
 /*

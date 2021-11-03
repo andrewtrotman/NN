@@ -100,15 +100,15 @@ class nn
 		void train(size_t epocs)
 			{
 			/*
-				Forward propegate the training set
+				Forward propagate the training set
 			*/
 			for (size_t level = 1;  level < depth; level++)
 				network[level - 1]->values.multiply(network[level]->values, network[level]->derivitive, network[level]->weights, ReLU, ReLU_derivitive);
 
 			/*
-				Compute the deltas through back propegation
+				Compute the deltas through back propagation
 			*/
-         	network[depth - 1]->delta = (network[depth - 1]->values - training_answers).hadamard_product(network[depth - 1]->derivitive);
+			network[depth - 1]->values.subtract_then_hadamard_product(network[depth - 1]->delta, training_answers, network[depth - 1]->derivitive);
 			for (size_t level = depth - 2; level > 0; level--)
 	         	network[level]->delta = (network[level + 1]->delta * ~network[level + 1]->weights).hadamard_product(network[level]->derivitive);
 

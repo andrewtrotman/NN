@@ -53,7 +53,7 @@ class node
 			values(previous.values.rows, units),
 			weights(previous.values.columns, units),
 			derivitive(previous.values.rows, units),
-			delta(0, 0)
+			delta(previous.values.rows, units)
 			{
 			for (size_t entry = 0; entry < units * previous.values.rows; entry++)
 				{
