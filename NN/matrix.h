@@ -103,11 +103,11 @@ class matrix
 			if (rows != what.rows || columns != what.columns)
 				{
 				delete [] values;
+
+				rows = what.rows;
+				columns = what.columns;
 				values = new double [rows * columns];
 				}
-
-			rows = what.rows;
-			columns = what.columns;
 
 			memcpy(values, what.values, sizeof(*values) * rows * columns);
 
@@ -207,6 +207,24 @@ class matrix
 			}
 
 		/*
+			MATRIX::NEURAL_MULTIPLY()
+			-------------------------
+		*/
+		template <typename FUNCTOR>
+		void neural_multiply(matrix &answer, matrix &with, FUNCTOR &f)  const noexcept
+			{
+			for (size_t row = 0; row < rows; row++)
+				for (size_t other_column = 0; other_column < with.columns; other_column++)
+					{
+					double score = 0;
+					for (size_t column = 0; column < columns; column++)
+						score += operator()(row, column) * with(column, other_column);
+					answer(row, other_column) = f(score);
+					}
+			}
+
+
+		/*
 			MATRIX::MULTIPLY()
 			------------------
 		*/
@@ -218,6 +236,48 @@ class matrix
 					answer(row, other_column) = 0;
 					for (size_t column = 0; column < columns; column++)
 						answer(row, other_column) += operator()(row, column) * with(column, other_column);
+					}
+			}
+
+		/*
+			MATRIX::DOT_TRANSPOSE_HADAMARD()
+			--------------------------------
+			Compute ((this ⋅ withᵀ) ⊙ prod) where:
+				⋅ is the dot product
+				ᵀ is the transpose operator
+				⊙ is the Hadamard operator
+		*/
+		void dot_transpose_hadamard(matrix &answer, matrix &with, matrix &prod)  const noexcept
+			{
+			for (size_t row = 0; row < rows; row++)
+				for (size_t other_column = 0; other_column < with.columns; other_column++)
+					{
+					double got = 0;
+					for (size_t column = 0; column < columns; column++)
+						got += operator()(row, column) * with(other_column, column);
+
+					answer(row, other_column) = got * prod(row, other_column);
+					}
+			}
+
+		/*
+			MATRIX::TRANSPOSE_DOT_TIMES()
+			-----------------------------
+			Compute (this - (withᵀ ⋅ prod * scalar) where:
+				- is vector subtraction
+				⋅ is the dot product
+				ᵀ is the transpose operator
+				* is scalar product
+		*/
+		void minus_transpose_dot_times(matrix &answer, matrix &with, matrix &prod, double scalar)  const noexcept
+			{
+			for (size_t row = 0; row < rows; row++)
+				for (size_t other_column = 0; other_column < with.columns; other_column++)
+					{
+					double got = 0;
+					for (size_t column = 0; column < columns; column++)
+						got += with(column, row) * prod(column, other_column);
+					answer(row, other_column) =  operator()(row, other_column) - (got * scalar);
 					}
 			}
 
@@ -290,6 +350,7 @@ class matrix
 		matrix hadamard_product(matrix &right_hand_side)
 			{
 			matrix answer(rows, columns);
+			
 			for (size_t row = 0; row < rows; row++)
 				for (size_t column = 0; column < columns; column++)
 					answer(row, column) = operator()(row, column) * right_hand_side(row, column);

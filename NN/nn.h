@@ -88,7 +88,7 @@ class nn
 		void execute(void)
 			{
 			for (size_t level = 1;  level < depth; level++)
-				network[level - 1]->values.multiply(network[level]->values, network[level]->derivitive, network[level]->weights, ReLU, ReLU_derivitive);
+				network[level - 1]->values.neural_multiply(network[level]->values, network[level]->weights, ReLU);
 
 			std::cout << "Answer:\n" << network[depth - 1]->values << '\n';
 			}
@@ -110,13 +110,19 @@ class nn
 			*/
 			network[depth - 1]->values.subtract_then_hadamard_product(network[depth - 1]->delta, training_answers, network[depth - 1]->derivitive);
 			for (size_t level = depth - 2; level > 0; level--)
-	         	network[level]->delta = (network[level + 1]->delta * ~network[level + 1]->weights).hadamard_product(network[level]->derivitive);
+				network[level + 1]->delta.dot_transpose_hadamard(network[level]->delta , network[level + 1]->weights, network[level]->derivitive);
 
 			/*
 				Update the weights
 			*/
 			for (size_t level = 1;  level < depth; level++)
-				network[level]->weights = network[level]->weights - (~network[level - 1]->values * network[level]->delta * learning_parameter);
+				{
+				matrix into(network[level]->weights.rows, network[level]->weights.columns);
+
+//				network[level]->weights = network[level]->weights - (~network[level - 1]->values * network[level]->delta * learning_parameter);
+				network[level]->weights.minus_transpose_dot_times(into, network[level - 1]->values, network[level]->delta, learning_parameter);
+				network[level]->weights = into;
+				}
 			}
 
 		/*
