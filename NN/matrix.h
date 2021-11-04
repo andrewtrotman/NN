@@ -261,8 +261,8 @@ class matrix
 			}
 
 		/*
-			MATRIX::TRANSPOSE_DOT_TIMES()
-			-----------------------------
+			MATRIX::MINUS_TRANSPOSE_DOT_TIMES()
+			-----------------------------------
 			Compute (this - (withᵀ ⋅ prod * scalar) where:
 				- is vector subtraction
 				⋅ is the dot product

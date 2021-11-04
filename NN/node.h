@@ -55,11 +55,8 @@ class node
 			derivitive(previous.values.rows, units),
 			delta(previous.values.rows, units)
 			{
-			for (size_t entry = 0; entry < units * previous.values.rows; entry++)
-				{
+			for (size_t entry = 0; entry < previous.values.columns * units; entry++)
 				weights.values[entry] = drand48();
-				derivitive.values[entry] = 0;
-				}
 			}
 
 		/*

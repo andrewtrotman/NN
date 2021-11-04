@@ -119,9 +119,9 @@ class nn
 				{
 				matrix into(network[level]->weights.rows, network[level]->weights.columns);
 
-//				network[level]->weights = network[level]->weights - (~network[level - 1]->values * network[level]->delta * learning_parameter);
-				network[level]->weights.minus_transpose_dot_times(into, network[level - 1]->values, network[level]->delta, learning_parameter);
-				network[level]->weights = into;
+				network[level]->weights = network[level]->weights - (~network[level - 1]->values * network[level]->delta * learning_parameter);
+//				network[level]->weights.minus_transpose_dot_times(into, network[level - 1]->values, network[level]->delta, learning_parameter);
+//				network[level]->weights = into;
 				}
 			}
 
