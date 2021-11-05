@@ -58,27 +58,33 @@ class nn
 	private:
 		/*
 			CLASS NN::LAYER
-			--------------
+			---------------
 		*/
 		/*!
 			@class layer
 			@brief A single layer in the multi-layer perceptron
+			@details This class holds the connections between this layer and the previous layer.  So, for example, weights are the weights between this layer and the layer
+			immediately closer to the input layer.
 		*/
 		class layer
 			{
 			public:
-				matrix values;					// the values stored in each of the units at this level of the network
-				matrix weights_space;			// storage space for the current in-use set of weights ((switches using weights and weights_next)
-				matrix weights_next_space;		// storage space for the next set of weights (switches using weights and weights_next)
-				matrix *weights;				// the current set of weights
-				matrix *weights_next;			// the set of weights to use next iteration
-				matrix derivitive;				// the derivitive of the weights
-				matrix delta;					// the error at this level of the network
+				matrix values;					///< the values stored in each of the units at this level of the network
+				matrix weights_space;			///< storage space for the current in-use set of weights ((switches using weights and weights_next)
+				matrix weights_next_space;		///< storage space for the next set of weights (switches using weights and weights_next)
+				matrix *weights;				///< the current set of weights
+				matrix *weights_next;			///< the set of weights to use next iteration
+				matrix derivitive;				///< the derivitive of the weights
+				matrix delta;					///< the error at this level of the network
 
 			public:
 				/*
 					LAYER::LAYER()
 					--------------
+				*/
+				/*!
+					@brief Constructor - used for the input layer of the network
+					@param training_data [in] The training data to be used to train the network (is copied in the constructor)
 				*/
 				layer(matrix &training_data) :
 					values(training_data.rows, training_data.columns),
@@ -87,9 +93,15 @@ class nn
 					derivitive(0, 0),
 					delta(0,0)
 					{
+					/*
+						Set up the pointers.
+					*/
 					weights = &weights_space;
 					weights_next = &weights_next_space;
 
+					/*
+						Take a copy of the training data
+					*/
 					values = training_data;
 					}
 
@@ -97,6 +109,12 @@ class nn
 					LAYER::LAYER()
 					--------------
 				*/
+				/*!
+					@brief Constructor - used for hidden and output layers
+					@param previous [in] a reference to the previous layer of the network - used to determine the number of units in the previous layer
+					@param units [in] The number of units in this layer of the network
+				*/
+
 				layer(layer &previous, size_t units) :
 					values(previous.values.rows, units),
 					weights_space(previous.values.columns, units),
@@ -104,9 +122,15 @@ class nn
 					derivitive(previous.values.rows, units),
 					delta(previous.values.rows, units)
 					{
+					/*
+						Set up the pointers.
+					*/
 					weights = &weights_space;
 					weights_next = &weights_next_space;
 
+					/*
+						Set the weights between the previous layer and this to random values.  That is, start with random weights between the layers
+					*/
 					for (size_t entry = 0; entry < previous.values.columns * units; entry++)
 						weights->values[entry] = drand48();
 					}
