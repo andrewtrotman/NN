@@ -13,10 +13,13 @@
 class node
 	{
 	public:
-		matrix values;
-		matrix weights;
-		matrix derivitive;
-		matrix delta;
+		matrix values;					// the values stored in each of the units at this level of the network
+		matrix weights_space;			// storage space for the current in-use set of weights ((switches using weights and weights_next)
+		matrix weights_next_space;		// storage space for the next set of weights (switches using weights and weights_next)
+		matrix *weights;				// the current set of weights
+		matrix *weights_next;			// the set of weights to use next iteration
+		matrix derivitive;				// the derivitive of the weights
+		matrix delta;					// the error at this level of the network
 
 	public:
 		/*
@@ -25,11 +28,13 @@ class node
 		*/
 		node(size_t input_units) :
 			values(input_units, 1),
-			weights(0, 0),
+			weights_space(0, 0),
+			weights_next_space(0, 0),
 			derivitive(0,0),
 			delta(0,0)
 			{
-			/* Nothing */
+			weights = &weights_space;
+			weights_next = &weights_next_space;
 			}
 
 		/*
@@ -38,10 +43,14 @@ class node
 		*/
 		node(matrix &training_data) :
 			values(training_data.rows, training_data.columns),
-			weights(0, 0),
+			weights_space(0, 0),
+			weights_next_space(0, 0),
 			derivitive(0, 0),
 			delta(0,0)
 			{
+			weights = &weights_space;
+			weights_next = &weights_next_space;
+
 			values = training_data;
 			}
 
@@ -51,12 +60,16 @@ class node
 		*/
 		node(node &previous, size_t units) :
 			values(previous.values.rows, units),
-			weights(previous.values.columns, units),
+			weights_space(previous.values.columns, units),
+			weights_next_space(previous.values.columns, units),
 			derivitive(previous.values.rows, units),
 			delta(previous.values.rows, units)
 			{
+			weights = &weights_space;
+			weights_next = &weights_next_space;
+			
 			for (size_t entry = 0; entry < previous.values.columns * units; entry++)
-				weights.values[entry] = drand48();
+				weights->values[entry] = drand48();
 			}
 
 		/*

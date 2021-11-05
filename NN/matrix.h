@@ -131,24 +131,29 @@ class matrix
 			}
 
 		/*
-			MATRIX::SUBTRACT()
-			------------------
+			MATRIX::OPERATOR==()
+			--------------------
 		*/
-		void subtract(matrix &answer, matrix &right_hand_side) const noexcept
+		bool operator==(const matrix &with) const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t column = 0; column < columns; column++)
-					answer(row, column) = operator()(row, column) - right_hand_side(row, column);
+					if (operator()(row, column) != with(row, column))
+						return false;
+			return true;
 			}
 
 		/*
 			MATRIX::OPERATOR-()
 			-------------------
 		*/
-		matrix operator-(matrix &with) const noexcept
+		matrix operator-(matrix &right_hand_side) const noexcept
 			{
-			matrix answer(with.rows, with.columns);
-			subtract(answer, with);
+			matrix answer(right_hand_side.rows, right_hand_side.columns);
+
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = operator()(row, column) - right_hand_side(row, column);
 
 			return answer;
 			}
@@ -159,41 +164,56 @@ class matrix
 		*/
 		matrix operator-(matrix &&with) const noexcept
 			{
-			matrix answer(with.rows, with.columns);
-			subtract(answer, with);
-
-			return answer;
-			}
-
-		/*
-			MATRIX::ADD()
-			-------------
-		*/
-		void add(matrix &answer, matrix &right_hand_side) const noexcept
-			{
-			for (size_t row = 0; row < rows; row++)
-				for (size_t column = 0; column < columns; column++)
-					answer(row, column) = operator()(row, column) + right_hand_side(row, column);
+			return operator-(with);
 			}
 
 		/*
 			MATRIX::OPERATOR+()
 			-------------------
 		*/
-		matrix operator+(matrix &with)  const noexcept
+		matrix operator+(matrix &right_hand_side) const noexcept
 			{
-			matrix answer(with.rows, with.columns);
-			add(answer, with);
+			matrix answer(rows, columns);
+
+			for (size_t row = 0; row < rows; row++)
+				for (size_t column = 0; column < columns; column++)
+					answer(row, column) = operator()(row, column) + right_hand_side(row, column);
 
 			return answer;
 			}
 
 		/*
-			MATRIX::MULTIPLY()
-			------------------
+			MATRIX::OPERATOR+()
+			-------------------
+		*/
+		matrix operator+(matrix &&with) const noexcept
+			{
+			return operator+(with);
+			}
+
+		/*
+			MATRIX::FEED_FORWARD()
+			----------------------
 		*/
 		template <typename FUNCTOR>
-		void multiply(matrix &answer, matrix &derivitive, matrix &with, FUNCTOR &f, FUNCTOR &derivitive_of_f)  const noexcept
+		void feed_forward(matrix &answer, matrix &with, FUNCTOR &f) const noexcept
+			{
+			for (size_t row = 0; row < rows; row++)
+				for (size_t other_column = 0; other_column < with.columns; other_column++)
+					{
+					double score = 0;
+					for (size_t column = 0; column < columns; column++)
+						score += operator()(row, column) * with(column, other_column);
+					answer(row, other_column) = f(score);
+					}
+			}
+
+		/*
+			MATRIX::FEED_FORWARD_READY_FOR_BACKPROP()
+			-----------------------------------------
+		*/
+		template <typename FUNCTOR>
+		void feed_forward_ready_for_backprop(matrix &answer, matrix &derivitive, matrix &with, FUNCTOR &f, FUNCTOR &derivitive_of_f) const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
 				for (size_t other_column = 0; other_column < with.columns; other_column++)
@@ -207,39 +227,6 @@ class matrix
 			}
 
 		/*
-			MATRIX::NEURAL_MULTIPLY()
-			-------------------------
-		*/
-		template <typename FUNCTOR>
-		void neural_multiply(matrix &answer, matrix &with, FUNCTOR &f)  const noexcept
-			{
-			for (size_t row = 0; row < rows; row++)
-				for (size_t other_column = 0; other_column < with.columns; other_column++)
-					{
-					double score = 0;
-					for (size_t column = 0; column < columns; column++)
-						score += operator()(row, column) * with(column, other_column);
-					answer(row, other_column) = f(score);
-					}
-			}
-
-
-		/*
-			MATRIX::MULTIPLY()
-			------------------
-		*/
-		void multiply(matrix &answer, matrix &with)  const noexcept
-			{
-			for (size_t row = 0; row < rows; row++)
-				for (size_t other_column = 0; other_column < with.columns; other_column++)
-					{
-					answer(row, other_column) = 0;
-					for (size_t column = 0; column < columns; column++)
-						answer(row, other_column) += operator()(row, column) * with(column, other_column);
-					}
-			}
-
-		/*
 			MATRIX::DOT_TRANSPOSE_HADAMARD()
 			--------------------------------
 			Compute ((this ⋅ withᵀ) ⊙ prod) where:
@@ -247,14 +234,14 @@ class matrix
 				ᵀ is the transpose operator
 				⊙ is the Hadamard operator
 		*/
-		void dot_transpose_hadamard(matrix &answer, matrix &with, matrix &prod)  const noexcept
+		void dot_transpose_hadamard(matrix &answer, matrix &with, matrix &prod) const noexcept
 			{
 			for (size_t row = 0; row < rows; row++)
-				for (size_t other_column = 0; other_column < with.columns; other_column++)
+				for (size_t other_column = 0; other_column < with.rows; other_column++)
 					{
 					double got = 0;
 					for (size_t column = 0; column < columns; column++)
-						got += operator()(row, column) * with(other_column, column);
+						got += operator()(row, column) * with(column, other_column);
 
 					answer(row, other_column) = got * prod(row, other_column);
 					}
@@ -269,15 +256,15 @@ class matrix
 				ᵀ is the transpose operator
 				* is scalar product
 		*/
-		void minus_transpose_dot_times(matrix &answer, matrix &with, matrix &prod, double scalar)  const noexcept
+		void minus_transpose_dot_times(matrix &answer, matrix &with, matrix &prod, double scalar) const noexcept
 			{
-			for (size_t row = 0; row < rows; row++)
-				for (size_t other_column = 0; other_column < with.columns; other_column++)
+			for (size_t row = 0; row < with.columns; row++)
+				for (size_t other_column = 0; other_column < prod.columns; other_column++)
 					{
 					double got = 0;
-					for (size_t column = 0; column < columns; column++)
+					for (size_t column = 0; column < with.rows; column++)
 						got += with(column, row) * prod(column, other_column);
-					answer(row, other_column) =  operator()(row, other_column) - (got * scalar);
+					answer(row, other_column) = operator()(row, other_column) - got * scalar;
 					}
 			}
 
@@ -288,7 +275,14 @@ class matrix
 		matrix operator*(matrix &with)  const noexcept
 			{
 			matrix answer(rows, with.columns);
-			multiply(answer, with);
+
+			for (size_t row = 0; row < rows; row++)
+				for (size_t other_column = 0; other_column < with.columns; other_column++)
+					{
+					answer(row, other_column) = 0;
+					for (size_t column = 0; column < columns; column++)
+						answer(row, other_column) += operator()(row, column) * with(column, other_column);
+					}
 
 			return answer;
 			}
@@ -299,17 +293,14 @@ class matrix
 		*/
 		matrix operator*(matrix &&with)  const noexcept
 			{
-			matrix answer(rows, with.columns);
-			multiply(answer, with);
-
-			return answer;
+			return operator*(with);
 			}
 
 		/*
 			MATRIX::OPERATOR*()
 			-------------------
 		*/
-		matrix operator*(double with)  const noexcept
+		matrix operator*(double with) const noexcept
 			{
 			matrix answer(rows, columns);
 
@@ -321,24 +312,17 @@ class matrix
 			}
 
 		/*
-			MATRIX::TRANSPOSE()
+			MATRIX::OPERATOR~()
 			-------------------
+			Transpose
 		*/
-		void transpose(matrix &answer)  const noexcept
+		matrix operator~() const noexcept
 			{
+			matrix answer(columns, rows);
+
 			for (size_t row = 0; row < rows; row++)
 				for (size_t column = 0; column < columns; column++)
 					answer(column, row) = operator()(row, column);
-			}
-
-		/*
-			MATRIX::OPERATOR~()
-			-------------------
-		*/
-		matrix operator~()  const noexcept
-			{
-			matrix answer(columns, rows);
-			transpose(answer);
 
 			return answer;
 			}
