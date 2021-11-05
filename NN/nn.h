@@ -108,20 +108,33 @@ class nn
 			/*
 				Compute the deltas through back propagation
 			*/
+//#define EXPENSIVE 1
+#ifdef EXPENSIVE
+         	network[depth - 1]->delta = (network[depth - 1]->values - training_answers).hadamard_product(network[depth - 1]->derivitive);
+#else
 			network[depth - 1]->values.subtract_then_hadamard_product(network[depth - 1]->delta, training_answers, network[depth - 1]->derivitive);
-			
+#endif
 			for (size_t level = depth - 2; level > 0; level--)
+				{
+#ifdef EXPENSIVE
+	         	network[level]->delta = (network[level + 1]->delta * ~(*network[level + 1]->weights)).hadamard_product(network[level]->derivitive);
+#else
 				network[level + 1]->delta.dot_transpose_hadamard(network[level]->delta , *network[level + 1]->weights, network[level]->derivitive);
+#endif
+				}
 
 			/*
 				Update the weights
 			*/
 			for (size_t level = 1;  level < depth; level++)
 				{
+#ifdef EXPENSIVE
+				*network[level]->weights = *network[level]->weights - (~network[level - 1]->values * network[level]->delta * learning_parameter);
+#else
+
 				network[level]->weights->minus_transpose_dot_times(*network[level]->weights_next, network[level - 1]->values, network[level]->delta, learning_parameter);
 				std::swap(network[level]->weights, network[level]->weights_next);
-
-//				*network[level]->weights = *network[level]->weights - (~network[level - 1]->values * network[level]->delta * learning_parameter);
+#endif
 				}
 			}
 

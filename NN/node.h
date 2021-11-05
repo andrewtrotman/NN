@@ -26,21 +26,6 @@ class node
 			NODE::NODE()
 			------------
 		*/
-		node(size_t input_units) :
-			values(input_units, 1),
-			weights_space(0, 0),
-			weights_next_space(0, 0),
-			derivitive(0,0),
-			delta(0,0)
-			{
-			weights = &weights_space;
-			weights_next = &weights_next_space;
-			}
-
-		/*
-			NODE::NODE()
-			------------
-		*/
 		node(matrix &training_data) :
 			values(training_data.rows, training_data.columns),
 			weights_space(0, 0),
@@ -70,14 +55,5 @@ class node
 			
 			for (size_t entry = 0; entry < previous.values.columns * units; entry++)
 				weights->values[entry] = drand48();
-			}
-
-		/*
-			NODE::~NODE()
-			------------
-		*/
-		virtual ~node()
-			{
-			/* Nothing */
 			}
 	};
