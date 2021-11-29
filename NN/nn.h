@@ -248,6 +248,30 @@ class nn
 #else
 				network[level + 1]->delta.dot_transpose_hadamard(network[level]->delta , *network[level + 1]->weights, network[level]->derivitive);
 #endif
+
+
+				/*
+				TO DO:
+					Use the Adam optimiser (see here: https://machinelearningmastery.com/adam-optimization-from-scratch/ ):
+
+						alpha(t) = alpha * sqrt(1 – beta2(t)) / (1 – beta1(t))
+						x(t) = x(t-1) – alpha(t) * m(t) / (sqrt(v(t)) + eps)
+
+						where
+							m(t) = beta1 * m(t-1) + (1 – beta1) * g(t)
+							v(t) = beta2 * v(t-1) + (1 – beta2) * g(t)^2
+
+							beta1(t) = beta1^t
+							beta2(t) = beta2^t
+
+							m(0) = 0
+							v(0) = 0
+						and
+							alpha: Initial step size (learning rate), a typical value is 0.001.
+							beta1: Decay factor for first momentum, a typical value is 0.9.
+							beta2: Decay factor for infinity norm, a typical value is 0.999.
+							eps is a small value (epsilon) such as 1e-8 that ensures we do not encounter a divide by zero error
+				*/
 				}
 
 			/*
