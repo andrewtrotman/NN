@@ -69,13 +69,13 @@ class nn
 		class layer
 			{
 			public:
-				matrix values;					///< the values stored in each of the units at this level of the network
+				matrix values;						///< the values stored in each of the units at this level of the network
 				matrix weights_space;			///< storage space for the current in-use set of weights ((switches using weights and weights_next)
 				matrix weights_next_space;		///< storage space for the next set of weights (switches using weights and weights_next)
-				matrix *weights;				///< the current set of weights
+				matrix *weights;					///< the current set of weights
 				matrix *weights_next;			///< the set of weights to use next iteration
 				matrix derivitive;				///< the derivitive of the weights
-				matrix delta;					///< the error at this level of the network
+				matrix delta;						///< the error at this level of the network
 
 			public:
 				/*
@@ -91,7 +91,7 @@ class nn
 					weights_space(0, 0),
 					weights_next_space(0, 0),
 					derivitive(0, 0),
-					delta(0,0)
+					delta(0, 0)
 					{
 					/*
 						Set up the pointers.
@@ -114,13 +114,12 @@ class nn
 					@param previous [in] a reference to the previous layer of the network - used to determine the number of units in the previous layer
 					@param units [in] The number of units in this layer of the network
 				*/
-
 				layer(layer &previous, size_t units) :
-					values(previous.values.rows, units),
-					weights_space(previous.values.columns, units),
-					weights_next_space(previous.values.columns, units),
-					derivitive(previous.values.rows, units),
-					delta(previous.values.rows, units)
+					values(previous.values.rows, units + 1),
+					weights_space(previous.values.columns, units + 1),
+					weights_next_space(previous.values.columns, units + 1),
+					derivitive(previous.values.rows, units + 1),
+					delta(previous.values.rows, units + 1)
 					{
 					/*
 						Set up the pointers.
@@ -131,8 +130,25 @@ class nn
 					/*
 						Set the weights between the previous layer and this to random values.  That is, start with random weights between the layers
 					*/
-					for (size_t entry = 0; entry < previous.values.columns * units; entry++)
+#define HE_INITIALISATION 1
+#ifdef HE_INITIALISATION
+					/*
+						He Initialization starts with random numbers in the range -sqrt(2/n) to sqrt(2/n), where n is the number of nodes in the previous layer.
+						see:
+							K. He, X. Zhang, S. Ren, J. Sun (2015). Delving deep into rectifiers: Surpassing human-level performance on imagenet classification.
+							In Proceedings of the IEEE international conference on computer vision (pp. 1026-1034).
+					*/
+					double nodes_in_previous_layer = previous.values.rows - 1;		// -1 because of the bias unit
+					double max = sqrt(2.0 / nodes_in_previous_layer);
+					for (size_t entry = 0; entry < previous.values.columns * units + 1; entry++)
+						weights->values[entry] = (drand48() - 0.5) / max;
+#else
+					/*
+						use random weights in the range 0..1
+					*/
+					for (size_t entry = 0; entry < previous.values.columns * units + 1; entry++)
 						weights->values[entry] = drand48();
+#endif
 					}
 			};
 
@@ -204,7 +220,17 @@ class nn
 				Forward propagate the training set
 			*/
 			for (size_t level = 1;  level < depth; level++)
+				{
+				/*
+					re-initialise the bias units
+				*/
+				network[level - 1]->values.values[network[level - 1]->values.columns] = 1.0;
+
+				/*
+					Now propagate
+				*/
 				network[level - 1]->values.feed_forward_ready_for_backprop(network[level]->values, network[level]->derivitive, *network[level]->weights, ReLU, ReLU_derivitive);
+				}
 
 			/*
 				Compute the deltas through back propagation
